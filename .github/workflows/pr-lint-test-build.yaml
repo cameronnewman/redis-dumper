@@ -1,0 +1,39 @@
+name: PR Lint / Test / Build
+
+on:
+  push:
+    branches: [ 'main' ]
+  pull_request:
+    branches: [ '**' ]  # All branches
+  workflow_dispatch:
+
+env:
+  ENVIRONMENT: ci
+
+jobs:
+  go-lint:
+    name: Go Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Go Lint and format
+        run: make go-lint
+
+  go-test:
+    name: Go Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Go Unit tests
+        run: make go-test
+
+  go-build:
+    name: Go Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Go Build
+        run: make go-build
