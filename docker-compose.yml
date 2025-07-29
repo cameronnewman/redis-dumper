@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis-dumper-test
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./init-redis.sh:/docker-entrypoint-initdb.d/init-redis.sh
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-init:
+    image: redis:7-alpine
+    container_name: redis-init
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./test-data.redis:/test-data.redis
+    command: >
+      sh -c "
+        echo 'Loading test data into Redis...' &&
+        redis-cli -h redis < /test-data.redis &&
+        echo 'Test data loaded successfully!'
+      "
+
+volumes:
+  redis-data:

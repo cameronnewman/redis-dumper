@@ -1,0 +1,78 @@
+# Test Data for Redis Dumper
+# This file contains sample data for all Redis data types
+
+# Clear existing data
+FLUSHDB
+
+# String values
+SET config:app_name "Redis Dumper Test"
+SET config:version "1.0.0"
+SET config:environment "development"
+SET session:user123 "{"user_id": 123, "name": "Alice", "last_login": "2024-01-15T10:30:00Z"}"
+SET session:user456 "{"user_id": 456, "name": "Bob", "last_login": "2024-01-15T11:45:00Z"}"
+SETEX cache:page:home 3600 "<html>Homepage content</html>"
+SETEX cache:page:about 7200 "<html>About page content</html>"
+
+# Hash values
+HSET user:1001 name "John Doe" email "john@example.com" age "30" country "USA" created_at "2024-01-01"
+HSET user:1002 name "Jane Smith" email "jane@example.com" age "28" country "UK" created_at "2024-01-02"
+HSET user:1003 name "Carlos Garcia" email "carlos@example.com" age "35" country "Spain" created_at "2024-01-03"
+HSET product:2001 name "Laptop Pro" price "1299.99" category "Electronics" brand "TechCorp" stock "50"
+HSET product:2002 name "Wireless Mouse" price "29.99" category "Electronics" brand "TechCorp" stock "200"
+HSET product:2003 name "Office Chair" price "249.99" category "Furniture" brand "ComfortSeating" stock "25"
+
+# Set values
+SADD tags:programming "python" "golang" "javascript" "rust" "java" "typescript"
+SADD tags:databases "redis" "postgresql" "mysql" "mongodb" "cassandra" "duckdb"
+SADD tags:cloud "aws" "gcp" "azure" "digitalocean" "heroku"
+SADD categories:electronics "laptop" "mouse" "keyboard" "monitor" "headphones"
+SADD categories:furniture "chair" "desk" "lamp" "bookshelf"
+SADD user:1001:skills "python" "redis" "aws" "postgresql"
+SADD user:1002:skills "javascript" "mongodb" "azure" "react"
+SADD user:1003:skills "golang" "kubernetes" "gcp" "prometheus"
+
+# Sorted set values (with scores)
+ZADD leaderboard:global 9500 "player:alice" 9200 "player:bob" 8900 "player:charlie" 8700 "player:david" 8500 "player:eve"
+ZADD leaderboard:weekly 2100 "player:frank" 2050 "player:grace" 1980 "player:henry" 1920 "player:iris" 1850 "player:jack"
+ZADD product:views 15420 "product:2001" 8930 "product:2002" 6750 "product:2003" 4520 "product:2004" 3210 "product:2005"
+ZADD trending:articles 542.5 "article:ai-revolution" 489.3 "article:climate-change" 412.7 "article:space-exploration" 387.2 "article:quantum-computing"
+
+# List values
+RPUSH queue:emails "{"to": "user1@example.com", "subject": "Welcome"}" "{"to": "user2@example.com", "subject": "Newsletter"}" "{"to": "user3@example.com", "subject": "Alert"}"
+RPUSH queue:tasks "{"task": "process_payment", "id": 1001}" "{"task": "send_email", "id": 1002}" "{"task": "generate_report", "id": 1003}"
+RPUSH log:errors "ERROR 2024-01-15 10:30:15 - Database connection failed" "ERROR 2024-01-15 10:31:22 - Invalid API key" "ERROR 2024-01-15 10:32:45 - Timeout exceeded"
+RPUSH history:user:1001 "login:2024-01-15T09:00:00Z" "view:product:2001" "add_to_cart:product:2001" "checkout:order:5001"
+RPUSH notifications:user:1002 "{"type": "message", "from": "user:1001", "text": "Hello!"}" "{"type": "like", "post": "post:3001"}" "{"type": "follow", "user": "user:1003"}"
+
+# Complex nested structures
+SET user:profile:1001 '{"personal": {"name": "John Doe", "age": 30, "location": {"city": "New York", "country": "USA"}}, "preferences": {"theme": "dark", "notifications": true}}'
+HSET order:5001 user_id "1001" total "1329.98" status "shipped" items '[{"product_id": "2001", "quantity": 1, "price": 1299.99}, {"product_id": "2002", "quantity": 1, "price": 29.99}]'
+
+# Keys with various TTLs
+SETEX temp:token:abc123 300 "temporary-auth-token"
+SETEX temp:otp:user1001 60 "123456"
+EXPIRE cache:page:home 1800
+EXPIRE session:user123 86400
+
+# Some keys with special characters
+SET "config:feature:new-ui" "enabled"
+SET "metric:api:/users/list:response_time" "145ms"
+SET "namespace::service::config" '{"port": 8080, "debug": false}'
+
+# Bitmap (stored as string)
+SETBIT visitors:2024:01:15 1001 1
+SETBIT visitors:2024:01:15 1002 1
+SETBIT visitors:2024:01:15 1003 1
+
+# Counter values
+SET counter:page_views "42150"
+SET counter:api_calls "1847293"
+INCR counter:page_views
+INCR counter:api_calls
+
+# Geographic data (as sorted sets)
+ZADD locations:stores 0 "store:001:40.7128:-74.0060:NYC"
+ZADD locations:stores 0 "store:002:51.5074:-0.1278:London"
+ZADD locations:stores 0 "store:003:48.8566:2.3522:Paris"
+
+echo "Test data loaded successfully!"
