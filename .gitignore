@@ -31,3 +31,14 @@ go.work.sum
 # .idea/
 # .vscode/
 .idea
+
+# Output directories
+output/
+local-export/
+/tmp/dumper/
+
+# Redis data volume
+redis-data/
+
+# Binary
+dumper

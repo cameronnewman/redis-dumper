@@ -522,21 +522,43 @@ go run ./cmd/dumper pattern "user:*"
 
 ### Testing with DuckDB
 
-After exporting, you can query the data using DuckDB:
+After exporting the test data, you can explore it with DuckDB:
 
 ```bash
-# Install DuckDB if you haven't already
-# macOS: brew install duckdb
-# Linux: wget https://github.com/duckdb/duckdb/releases/download/v0.9.2/duckdb_cli-linux-amd64.zip
+# View all data types in the export
+duckdb -c "SELECT type, COUNT(*) as count FROM read_parquet('./output/**/*.parquet') GROUP BY type ORDER BY count DESC;"
 
-# Query CSV exports
-duckdb -c "SELECT * FROM read_csv('./local-export/**/*.csv');"
+# Check the leaderboard
+duckdb -c "
+  SELECT 
+    SPLIT_PART(key, ':member:', 2) as player,
+    CAST(SPLIT_PART(SPLIT_PART(value, 'score=', 2), ',', 1) AS DOUBLE) as score
+  FROM read_parquet('./output/**/*.parquet')
+  WHERE key LIKE 'leaderboard:global:%'
+  ORDER BY score DESC;
+"
 
-# Query Parquet exports
-duckdb -c "SELECT * FROM read_parquet('./local-export/**/*.parquet');"
+# View user hashes
+duckdb -c "
+  SELECT 
+    SPLIT_PART(key, ':field:', 1) as user,
+    SPLIT_PART(key, ':field:', 2) as field,
+    value
+  FROM read_parquet('./output/**/*.parquet')
+  WHERE type = 'hash_field' AND key LIKE 'user:%'
+  ORDER BY user, field;
+"
 
-# More complex queries
-duckdb -c "SELECT type, COUNT(*) as count FROM read_parquet('./local-export/**/*.parquet') GROUP BY type;"
+# Find all programming-related tags
+duckdb -c "
+  SELECT DISTINCT 
+    SPLIT_PART(key, ':member:', 1) as set_name,
+    value as tag
+  FROM read_parquet('./output/**/*.parquet')
+  WHERE type = 'set_member' 
+    AND value IN ('python', 'golang', 'javascript', 'rust', 'java', 'typescript')
+  ORDER BY set_name, tag;
+"
 ```
 
 ## Development
