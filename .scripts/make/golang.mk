@@ -21,7 +21,6 @@ go-generate: check-SERVICE ## Runs `go generate` within a docker container
 ifeq ($(filter $(ENVIRONMENT),local docker),$(ENVIRONMENT))
 	cd ${SERVICE} && go generate ./...
 else
-	DOCKER_BUILDKIT=1 \
 	${DOCKER} run --rm \
 	-v $(PWD):/usr/src/app \
 	-w /usr/src/app \
@@ -40,7 +39,6 @@ go-mod: check-SERVICE ## Runs `go mod` within a docker container
 ifeq ($(filter $(ENVIRONMENT),local docker),$(ENVIRONMENT))
 	cd ${SERVICE} && go mod tidy
 else
-	DOCKER_BUILDKIT=1 \
 	${DOCKER} run --rm \
 	-v $(PWD):/usr/src/app \
 	-w /usr/src/app \
@@ -57,7 +55,6 @@ go-fmt: check-SERVICE ## Runs `go fmt` within a docker container
 ifeq ($(filter $(ENVIRONMENT),local docker),$(ENVIRONMENT))
 	cd ${SERVICE} && go fmt ./...
 else
-	DOCKER_BUILDKIT=1 \
 	${DOCKER} run --rm \
 	-v $(PWD):/usr/src/app \
 	-w /usr/src/app \
@@ -76,7 +73,6 @@ go-lint: check-SERVICE ## Runs `golangci-lint run` with more than 60 different l
 ifeq ($(filter $(ENVIRONMENT),local docker),$(ENVIRONMENT))
 	cd ${SERVICE} && golangci-lint run -v
 else
-	DOCKER_BUILDKIT=1 \
 	${DOCKER} run --rm \
 	-e GOPACKAGESPRINTGOLISTERRORS=1 \
 	-e GO111MODULE=on \
@@ -98,8 +94,6 @@ go-test: check-SERVICE ## Runs `go test` within a docker container
 ifeq ($(filter $(ENVIRONMENT),local docker),$(ENVIRONMENT))
 	cd ${SERVICE} && go test -failfast -cover -coverprofile=coverage.txt -v -p 8 -count=1 ./...
 else
-
-	DOCKER_BUILDKIT=1 \
 	${DOCKER} run --rm \
 	-v $(PWD):/usr/src/app \
 	-w /usr/src/app \
@@ -116,16 +110,14 @@ go-build: check-SERVICE ## Runs `go build` within a docker container
 	@echo "+++ $$(date) - Running 'go build' for all go apps"
 
 ifeq ($(filter $(ENVIRONMENT),local docker),$(ENVIRONMENT))
-	cd ${SERVICE} && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ${SERVICE} -ldflags '-s -w -X main.version=${VERSION_HASH}' cmd/${SERVICE}/main.go
+	cd ${SERVICE} && CGO_ENABLED=1 go build -v -o ${SERVICE} -ldflags '-s -w -X main.version=${VERSION_HASH}' cmd/${SERVICE}/main.go
 else
-
-	DOCKER_BUILDKIT=1 \
 	${DOCKER} run --rm \
 	-v $(PWD):/usr/src/app \
 	-w /usr/src/app \
 	--entrypoint=bash \
 	$(GOLANG_BUILD_IMAGE) \
-	-c "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ${SERVICE} -ldflags '-s -w -X main.version=$(VERSION_HASH)' cmd/${SERVICE}/main.go"
+	-c "CGO_ENABLED=1 go build -v -o ${SERVICE} -ldflags '-s -w -X main.version=$(VERSION_HASH)' cmd/${SERVICE}/main.go"
 
 endif
 
@@ -167,14 +159,12 @@ endif
 
 .PHONY: go-docker-bash
 go-docker-bash: check-SERVICE  ## Returns an interactive shell in the golang docker image - useful for debugging
-	DOCKER_BUILDKIT=1 \
 	${DOCKER} run -it --rm \
 	--memory=4g \
 	-v $(PWD)/${SERVICE}:/usr/src/app \
 	-w /usr/src/app \
 	--entrypoint "/bin/bash" \
 	$(GOLANG_BUILD_IMAGE)
-
 
 #
 #  /end golang
